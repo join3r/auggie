@@ -15,7 +15,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Dagger CLI
-        run: curl -fsSL https://dl.dagger.io/dagger/install.sh | sh
+        run: |
+          curl -fsSL https://dl.dagger.io/dagger/install.sh | sh
+          echo "$PWD/bin" >> $GITHUB_PATH
 
       - name: Build and Publish
         env:
