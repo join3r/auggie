@@ -21,10 +21,27 @@ jobs:
           username: join3r
           password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build and Push
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          push: true
-          tags: join3r/auggie:latest
+      - name: Build, Flatten, and Push
+        run: |
+          # Build the image
+          docker build -t temp-image .
+
+          # Create a container (don't run it)
+          container_id=$(docker create temp-image)
+
+          # Export filesystem and import as flat image (loses metadata)
+          docker export $container_id | docker import - flat-image
+
+          # Re-tag with proper config (re-apply ENTRYPOINT and WORKDIR)
+          docker build -t join3r/auggie:latest - <<'EOF'
+          FROM flat-image
+          WORKDIR /workspace
+          ENTRYPOINT ["/nodejs/bin/node", "/usr/local/lib/node_modules/@augmentcode/auggie/augment.mjs"]
+          EOF
+
+          # Cleanup
+          docker rm $container_id
+
+          # Push
+          docker push join3r/auggie:latest
 

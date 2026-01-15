@@ -10,7 +10,7 @@ RUN which auggie && auggie --version
 
 # Stage 2: Runtime stage - Distroless container
 # Using debian12 (bookworm) based distroless with nodejs support
-FROM gcr.io/distroless/nodejs22-debian12:nonroot
+FROM gcr.io/distroless/nodejs22-debian12
 
 # Copy the globally installed npm packages from the builder stage
 # npm global packages are installed to /usr/local/lib/node_modules
@@ -23,6 +23,5 @@ WORKDIR /workspace
 # The distroless nodejs image runs node as the entrypoint
 ENTRYPOINT ["/nodejs/bin/node", "/usr/local/lib/node_modules/@augmentcode/auggie/augment.mjs"]
 
-# Default command shows version
-CMD ["--version"]
+
 
