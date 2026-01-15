@@ -1,0 +1,30 @@
+name: Publish to Docker Hub
+
+on:
+  schedule:
+    # Run at 00:00 UTC on the 1st of every month
+    - cron: '0 0 1 * *'
+  # Allow manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Dagger CLI
+        run: curl -fsSL https://dl.dagger.io/dagger/install.sh | sh
+
+      - name: Build and Publish
+        env:
+          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
+        run: |
+          dagger -m github.com/purpleclay/daggerverse/docker call \
+            --registry=docker.io \
+            --username=join3r \
+            --password=env:DOCKER_TOKEN \
+            build --dir=. \
+            publish --ref=docker.io/join3r/auggie --tags=latest
+
