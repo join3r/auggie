@@ -14,19 +14,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Dagger CLI
-        run: |
-          curl -fsSL https://dl.dagger.io/dagger/install.sh | sh
-          echo "$PWD/bin" >> $GITHUB_PATH
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: join3r
+          password: ${{ secrets.DOCKER_TOKEN }}
 
-      - name: Build and Publish
-        env:
-          DOCKER_TOKEN: ${{ secrets.DOCKER_TOKEN }}
-        run: |
-          dagger -m github.com/purpleclay/daggerverse/docker call \
-            --registry=docker.io \
-            --username=join3r \
-            --password=env:DOCKER_TOKEN \
-            build --dir=. \
-            publish --ref=docker.io/join3r/auggie --tags=latest
+      - name: Build and Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: join3r/auggie:latest
 
